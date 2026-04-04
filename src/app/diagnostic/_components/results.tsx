@@ -1,21 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { api } from '@/lib/api';
+import { Button } from '@/components/ui/button';
 import { useT } from '@/lib/i18n';
-import { toast } from 'sonner';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
 } from 'recharts';
-
-interface Props {
-  diagnosticId: string;
-  data: any;
-  onRestart: () => void;
-}
 
 const RATING_LABEL: Record<string, string> = {
   Strong: '优秀', Medium: '中等', Developing: '发展中', Weak: '薄弱',
@@ -28,9 +19,14 @@ function scoreColor(s: number) {
   return 'text-red-500';
 }
 
+interface Props {
+  diagnosticId: string;
+  data: any;
+  onRestart: () => void;
+}
+
 export function Results({ diagnosticId, data, onRestart }: Props) {
   const { t } = useT();
-  const [generating, setGenerating] = useState(false);
 
   const score = data?.overall_score ?? 0;
   const rating = data?.overall_rating ?? '';
@@ -49,25 +45,26 @@ export function Results({ diagnosticId, data, onRestart }: Props) {
     fullMark: 100,
   }));
 
-  const handleReport = async () => {
-    setGenerating(true);
-    try {
-      await api.diagnostics.generateReport(diagnosticId);
-      toast.success(t('报告生成请求已发送', 'Report generation requested'));
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setGenerating(false);
-    }
-  };
-
   return (
     <div className="mx-auto w-full max-w-3xl flex flex-col gap-6">
-      {/* Overall */}
-      <Card className="text-center">
-        <CardContent className="pt-8 pb-6">
-          <p className="text-sm text-gray-500 mb-2">{t('诊断总分', 'Overall Score')}</p>
-          <p className={`text-6xl font-bold ${scoreColor(score)}`}>{score}</p>
+      {/* Completion banner */}
+      <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50/50 to-white">
+        <CardContent className="pt-6 pb-5 text-center">
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 mb-3">
+            <svg className="h-7 w-7 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-bold mb-1">{t('诊断完成', 'Diagnostic Complete')}</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            {t('以下是您企业六大结构的诊断评分，帮助您了解企业当前的优势与不足。', 'Below are your enterprise diagnostic scores across six structural dimensions.')}
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <div>
+              <p className={`text-5xl font-bold ${scoreColor(score)}`}>{score}</p>
+              <p className="text-xs text-gray-400 mt-1">{t('总分', 'Overall')}</p>
+            </div>
+          </div>
           <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
             {rating && <Badge className="bg-emerald-100 text-emerald-700 text-sm px-3 py-1">{rating}</Badge>}
             {stage && <Badge className="bg-gray-100 text-gray-700 text-sm px-3 py-1">{stage}</Badge>}
@@ -138,12 +135,20 @@ export function Results({ diagnosticId, data, onRestart }: Props) {
         </Card>
       )}
 
-      {/* Actions */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-center py-4">
-        <Button onClick={handleReport} disabled={generating}
-          className="cursor-pointer h-11 px-6 bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl font-semibold">
-          {generating ? t('生成中...', 'Generating...') : t('生成完整报告', 'Generate Full Report')}
-        </Button>
+      {/* CTA */}
+      <Card className="border-blue-200 bg-blue-50/30">
+        <CardContent className="pt-5 pb-4 text-center">
+          <p className="text-sm font-semibold text-blue-800 mb-1">
+            {t('想要获取完整诊断报告？', 'Want a full diagnostic report?')}
+          </p>
+          <p className="text-xs text-gray-500 mb-1">
+            {t('我们的顾问团队将根据您的诊断结果，为您生成一份详细的独角兽成长报告，包含定制化的行动建议。', 'Our advisory team will generate a detailed Unicorn Growth Report with customized action recommendations based on your results.')}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Restart */}
+      <div className="flex justify-center pb-6">
         <Button variant="outline" onClick={onRestart} className="cursor-pointer h-11 px-6 rounded-xl">
           {t('重新诊断', 'Start New Diagnostic')}
         </Button>

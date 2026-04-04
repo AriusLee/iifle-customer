@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { useT } from '@/lib/i18n';
 import { LangToggle } from './_components/lang-toggle';
+import { UserMenu } from './_components/user-menu';
 import { AuthForm } from './_components/auth-form';
 import { CompanyForm } from './_components/company-form';
 import { Questionnaire } from './_components/questionnaire';
@@ -75,9 +76,8 @@ export default function DiagnosticPage() {
   };
 
   const handleRestart = () => {
-    setDiagnosticId('');
     setResultData(null);
-    setStep('company');
+    setStep('questionnaire');
   };
 
   const stepLabels: { key: Step; zh: string; en: string }[] = [
@@ -111,7 +111,15 @@ export default function DiagnosticPage() {
               </div>
             ))}
           </div>
-          <LangToggle />
+          {step !== 'auth' && step !== 'loading' ? (
+            <UserMenu
+              companyName={resultData?.company_name}
+              diagnosticId={diagnosticId}
+              onLogout={() => { auth.clear(); setStep('auth'); setDiagnosticId(''); setResultData(null); }}
+            />
+          ) : (
+            <LangToggle />
+          )}
         </div>
       </header>
 

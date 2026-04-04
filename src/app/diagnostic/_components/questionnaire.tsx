@@ -114,6 +114,7 @@ export function Questionnaire({ diagnosticId, onComplete }: Props) {
   // Score display
   const moduleScore = moduleKey ? diag?.module_scores?.[moduleKey] : null;
   const findings = (diag?.key_findings || []).filter((f: any) => moduleKey && f.module === parseInt(moduleKey));
+  const sectionAnalysis = diag?.section_analyses?.[sectionKey];
 
   return (
     <div className="mx-auto w-full max-w-3xl" ref={topRef}>
@@ -148,12 +149,12 @@ export function Questionnaire({ diagnosticId, onComplete }: Props) {
 
       {/* Section A results — enterprise stage + AI analysis */}
       {isSectionDone && sectionKey === 'a' && diag?.enterprise_stage && (
-        <SectionAResults diag={diag} answers={answers} t={t} />
+        <SectionAResults diag={diag} answers={answers} analysis={sectionAnalysis} t={t} />
       )}
 
       {/* Module score results — sections B-F */}
       {isSectionDone && moduleScore && (
-        <ModuleResults moduleScore={moduleScore} findings={findings} section={section} answers={answers} t={t} />
+        <ModuleResults moduleScore={moduleScore} findings={findings} section={section} answers={answers} analysis={sectionAnalysis} t={t} />
       )}
 
       {/* Questions — hidden when submitted, unless editing */}
@@ -285,7 +286,7 @@ function getStageKey(stage: string): string {
   return '';
 }
 
-function SectionAResults({ diag, answers, t }: { diag: any; answers: Record<string, string | string[]>; t: (zh: string, en: string) => string }) {
+function SectionAResults({ diag, answers, analysis, t }: { diag: any; answers: Record<string, string | string[]>; analysis?: { analysis_zh: string; analysis_en: string }; t: (zh: string, en: string) => string }) {
   const stage = diag.enterprise_stage || '';
   const stageKey = getStageKey(stage);
   const info = STAGE_INFO[stageKey];
@@ -331,9 +332,13 @@ function SectionAResults({ diag, answers, t }: { diag: any; answers: Record<stri
         </div>
 
         {/* AI analysis text */}
-        {info && (
+        {(analysis?.analysis_zh || info) && (
           <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 mb-4">
-            <p className="text-xs leading-relaxed text-blue-800">{t(info.zh, info.en)}</p>
+            <p className="text-xs leading-relaxed text-blue-800 whitespace-pre-line">
+              {analysis?.analysis_zh
+                ? t(analysis.analysis_zh, analysis.analysis_en || analysis.analysis_zh)
+                : info ? t(info.zh, info.en) : ''}
+            </p>
           </div>
         )}
 
@@ -369,7 +374,7 @@ const RATING_INFO: Record<string, { zh: string; en: string }> = {
   Weak: { zh: '该模块表现较弱，是当前企业发展的主要瓶颈之一。建议优先制定改善计划。', en: 'This module is weak and represents a key bottleneck. Prioritize creating an improvement plan.' },
 };
 
-function ModuleResults({ moduleScore, findings, section, answers, t }: { moduleScore: any; findings: any[]; section: Section; answers: Record<string, string | string[]>; t: (zh: string, en: string) => string }) {
+function ModuleResults({ moduleScore, findings, section, answers, analysis, t }: { moduleScore: any; findings: any[]; section: Section; answers: Record<string, string | string[]>; analysis?: { analysis_zh: string; analysis_en: string }; t: (zh: string, en: string) => string }) {
   const score = moduleScore.score;
   const scoreColor = score >= 60 ? '#10B981' : score >= 40 ? '#F59E0B' : '#EF4444';
   const ratingInfo = RATING_INFO[moduleScore.rating];
@@ -415,9 +420,13 @@ function ModuleResults({ moduleScore, findings, section, answers, t }: { moduleS
         </div>
 
         {/* Analysis text */}
-        {ratingInfo && (
+        {(analysis?.analysis_zh || ratingInfo) && (
           <div className="rounded-lg bg-emerald-50 border border-emerald-100 p-3 mb-4">
-            <p className="text-xs leading-relaxed text-emerald-800">{t(ratingInfo.zh, ratingInfo.en)}</p>
+            <p className="text-xs leading-relaxed text-emerald-800 whitespace-pre-line">
+              {analysis?.analysis_zh
+                ? t(analysis.analysis_zh, analysis.analysis_en || analysis.analysis_zh)
+                : ratingInfo ? t(ratingInfo.zh, ratingInfo.en) : ''}
+            </p>
           </div>
         )}
 
