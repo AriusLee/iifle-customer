@@ -35,7 +35,7 @@ export const api = {
   diagnostics: {
     create: (data: { company: { legal_name: string; country?: string; contact_person?: string; contact_phone?: string } }) =>
       f<any>('/diagnostics', { method: 'POST', body: JSON.stringify(data) }),
-    list: () => f<any[]>('/diagnostics'),
+    list: () => f<any[]>('/diagnostics/mine'),
     get: (id: string) => f<any>(`/diagnostics/${id}`),
     saveDraft: (id: string, data: { answers: Record<string, string | string[]>; other_answers?: Record<string, string> }) =>
       f<any>(`/diagnostics/${id}/draft`, { method: 'PUT', body: JSON.stringify(data) }),
