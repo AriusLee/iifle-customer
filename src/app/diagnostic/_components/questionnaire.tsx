@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { useT } from '@/lib/i18n';
 import { SECTIONS, SECTION_MODULE, type Question, type Section } from '@/lib/questions';
+import { ListingRequirements } from './listing-requirements';
 import { toast } from 'sonner';
 
 interface Props {
@@ -157,6 +158,13 @@ export function Questionnaire({ diagnosticId, onComplete }: Props) {
         <ModuleResults moduleScore={moduleScore} findings={findings} section={section} answers={answers} analysis={sectionAnalysis} t={t} />
       )}
 
+      {/* Listing requirements panel — appears once Section F is submitted */}
+      {isSectionDone && sectionKey === 'f' && (
+        <div className="mt-4">
+          <ListingRequirements enterpriseStage={diag?.enterprise_stage} />
+        </div>
+      )}
+
       {/* Questions — hidden when submitted, unless editing */}
       {(!isSectionDone || editing) ? (
         <>
@@ -166,7 +174,12 @@ export function Questionnaire({ diagnosticId, onComplete }: Props) {
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-700">{sectionKey.toUpperCase()}</span>
                 <div>{t(section.zh, section.en)}</div>
               </CardTitle>
-              <p className="text-xs text-gray-400 ml-10">
+              <div className="ml-10 mt-2 rounded-lg bg-emerald-50/60 border border-emerald-100 px-3 py-2.5">
+                <p className="text-xs leading-relaxed text-gray-700">
+                  {t(section.desc_zh, section.desc_en)}
+                </p>
+              </div>
+              <p className="text-xs text-gray-400 ml-10 mt-2">
                 {answeredInSection}/{section.questions.length} {t('已回答', 'answered')}
               </p>
             </CardHeader>
@@ -269,6 +282,59 @@ function CheckSvg() {
   );
 }
 
+/* ── Structured analysis renderer ──────────────────────────────────────── */
+/**
+ * Parses the AI's [ZH]/[EN] structured output:
+ *   【现状判断】 ... 【核心优势】 ... 【关键短板】 ... 【行动建议】 ...
+ *   [State] ... [Strength] ... [Weakness] ... [Next Steps] ...
+ * and renders each block with a styled header.
+ *
+ * Falls back to plain text for non-structured strings.
+ */
+function StructuredAnalysis({ text, accent = 'emerald' }: { text: string; accent?: 'emerald' | 'blue' }) {
+  if (!text) return null;
+  // Match either 【...】 or [...] at line start as block headers.
+  // Split keeps the delimiters so we can identify which header each block belongs to.
+  const blockRegex = /(【[^】]+】|\[(?:State|Strength|Weakness|Next Steps)\])/g;
+  const parts = text.split(blockRegex).filter((p) => p && p.trim());
+
+  // If no headers detected, render as plain pre-line text
+  if (!parts.some((p) => blockRegex.test(p))) {
+    return <p className={`text-xs leading-relaxed whitespace-pre-line ${accent === 'blue' ? 'text-blue-800' : 'text-emerald-800'}`}>{text}</p>;
+  }
+
+  // Pair headers with their following content
+  const blocks: { header: string; body: string }[] = [];
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+    if (/^(【[^】]+】|\[(?:State|Strength|Weakness|Next Steps)\])$/.test(p.trim())) {
+      blocks.push({ header: p.trim(), body: (parts[i + 1] || '').trim() });
+      i++;
+    }
+  }
+
+  // Color hint per block type
+  const colorFor = (header: string): string => {
+    if (header.includes('优势') || header.includes('Strength')) return 'text-emerald-700';
+    if (header.includes('短板') || header.includes('Weakness')) return 'text-rose-700';
+    if (header.includes('建议') || header.includes('Next Steps')) return 'text-blue-700';
+    return 'text-gray-700';
+  };
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      {blocks.map((b, i) => (
+        <div key={i}>
+          <p className={`text-[11px] font-bold uppercase tracking-wide mb-1 ${colorFor(b.header)}`}>
+            {b.header.replace(/[【】\[\]]/g, '')}
+          </p>
+          <p className="text-xs leading-relaxed text-gray-700 whitespace-pre-line">{b.body}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ── Section A Results ─────────────────────────────────────────────────── */
 
 const STAGE_INFO: Record<string, { color: string; zh: string; en: string }> = {
@@ -333,12 +399,15 @@ function SectionAResults({ diag, answers, analysis, t }: { diag: any; answers: R
 
         {/* AI analysis text */}
         {(analysis?.analysis_zh || info) && (
-          <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 mb-4">
-            <p className="text-xs leading-relaxed text-blue-800 whitespace-pre-line">
-              {analysis?.analysis_zh
-                ? t(analysis.analysis_zh, analysis.analysis_en || analysis.analysis_zh)
-                : info ? t(info.zh, info.en) : ''}
-            </p>
+          <div className="rounded-lg bg-blue-50/60 border border-blue-100 p-3 mb-4">
+            {analysis?.analysis_zh ? (
+              <StructuredAnalysis
+                text={t(analysis.analysis_zh, analysis.analysis_en || analysis.analysis_zh)}
+                accent="blue"
+              />
+            ) : info ? (
+              <p className="text-xs leading-relaxed text-blue-800 whitespace-pre-line">{t(info.zh, info.en)}</p>
+            ) : null}
           </div>
         )}
 
@@ -421,12 +490,15 @@ function ModuleResults({ moduleScore, findings, section, answers, analysis, t }:
 
         {/* Analysis text */}
         {(analysis?.analysis_zh || ratingInfo) && (
-          <div className="rounded-lg bg-emerald-50 border border-emerald-100 p-3 mb-4">
-            <p className="text-xs leading-relaxed text-emerald-800 whitespace-pre-line">
-              {analysis?.analysis_zh
-                ? t(analysis.analysis_zh, analysis.analysis_en || analysis.analysis_zh)
-                : ratingInfo ? t(ratingInfo.zh, ratingInfo.en) : ''}
-            </p>
+          <div className="rounded-lg bg-emerald-50/60 border border-emerald-100 p-3 mb-4">
+            {analysis?.analysis_zh ? (
+              <StructuredAnalysis
+                text={t(analysis.analysis_zh, analysis.analysis_en || analysis.analysis_zh)}
+                accent="emerald"
+              />
+            ) : ratingInfo ? (
+              <p className="text-xs leading-relaxed text-emerald-800 whitespace-pre-line">{t(ratingInfo.zh, ratingInfo.en)}</p>
+            ) : null}
           </div>
         )}
 

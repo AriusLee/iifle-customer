@@ -17,6 +17,8 @@ export interface Section {
   key: string; // lowercase a-f
   zh: string;
   en: string;
+  desc_zh: string;
+  desc_en: string;
   questions: Question[];
 }
 
@@ -27,6 +29,8 @@ function o(zh: string, en: string): Option {
 export const SECTIONS: Section[] = [
   {
     key: 'a', zh: '企业基础画像', en: 'Enterprise Profile',
+    desc_zh: '了解你的企业基本情况：成立时间、行业、营收、团队规模、当前阶段。这一部分用于判断你的企业目前处于哪个成长阶段，是后续所有诊断的基础。请根据企业目前的真实情况选择，不要选"理想中"的状态。',
+    desc_en: 'Tells us the basics of your company: how old it is, what industry, revenue range, team size, and current stage. This section determines which growth stage your enterprise is in and is the foundation for everything that follows. Pick the option that matches your real situation today, not where you want to be.',
     questions: [
       { id: 'Q01', zh: '你的企业目前成立多久？', en: 'How long has your enterprise been established?', type: 'single', options: [o('还未正式开始','Not yet started'), o('0–1年','0–1 year'), o('1–3年','1–3 years'), o('3–5年','3–5 years'), o('5年以上','5+ years')] },
       { id: 'Q02', zh: '创始人在本行业累计经验？', en: "Founder's cumulative industry experience?", type: 'single', options: [o('0–1年','0–1 year'), o('1–3年','1–3 years'), o('3–5年','3–5 years'), o('5–10年','5–10 years'), o('10年以上','10+ years')] },
@@ -39,7 +43,9 @@ export const SECTIONS: Section[] = [
     ],
   },
   {
-    key: 'b', zh: '基因结构', en: 'Gene Structure',
+    key: 'b', zh: '基因结构', en: 'Gene Structure (Founder Dependency)',
+    desc_zh: '检测你的企业有多依赖创始人本人。一个能"做大"的企业，必须能在创始人不在的情况下继续运转和增长。这一部分判断你的企业是"老板就是公司"，还是已经形成了团队、系统和组织能力。回答时请诚实评估，不要美化。',
+    desc_en: 'Measures how much your company depends on you (the founder) personally. A company that can scale must be able to run and grow even when the founder is not in the room. This section reveals whether your business is "the boss IS the company" or whether real team, systems, and organizational capability exist. Be honest — don\'t flatter yourself.',
     questions: [
       { id: 'Q09', zh: '增长最依赖什么？', en: 'Growth depends on?', type: 'single', options: [o('创始人本人','Founder'), o('少数销售高手','Few sales experts'), o('单一渠道','Single channel'), o('单一产品','Single product'), o('团队与系统共同驱动','Team + system')] },
       { id: 'Q10', zh: '最大驱动力？', en: 'Main driving force?', type: 'single', options: [o('创始人个人能力','Founder ability'), o('创始人+少数核心骨干','Founder + key people'), o('核心团队','Core team'), o('团队+组织机制','Team + org structure'), o('已开始系统化运转','Systematized')] },
@@ -49,7 +55,9 @@ export const SECTIONS: Section[] = [
     ],
   },
   {
-    key: 'c', zh: '商业模式结构', en: 'Business Model',
+    key: 'c', zh: '商业模式结构', en: 'Business Model & Repeatability',
+    desc_zh: '检视你"怎么赚钱"以及这种赚钱方式是否可以复制放大。重点看：收入来源是否多元、销售是否可标准化、交付是否可独立运作、客户是否会复购或转介绍。这一部分决定你的企业能不能从"做生意"变成"做企业"。',
+    desc_en: 'Looks at HOW you make money and whether that money-making engine can be repeated and scaled. We check: revenue sources, whether sales can be standardized, whether delivery runs without the founder, and whether customers come back or refer others. This section decides whether your company can move from "doing business" to "running a business."',
     questions: [
       { id: 'Q14', zh: '收入来源？', en: 'Revenue source?', type: 'single', options: [o('单次交易','One-time'), o('长期复购','Repeat purchase'), o('订阅/月费','Subscription'), o('项目制收入','Project-based'), o('平台抽成','Platform commission'), o('多种收入组合','Multiple revenue mix')] },
       { id: 'Q15', zh: '复制成功率？', en: 'Replication success?', type: 'single', options: [o('很低几乎靠人','Very low'), o('有机会但不稳定','Possible unstable'), o('中等部分可复制','Medium partial'), o('较高已有初步方法','High initial methods'), o('很高已有成熟SOP','Very high mature SOP')] },
@@ -61,7 +69,9 @@ export const SECTIONS: Section[] = [
     ],
   },
   {
-    key: 'd', zh: '估值结构', en: 'Valuation',
+    key: 'd', zh: '估值结构', en: 'Valuation & Growth Story',
+    desc_zh: '判断你的企业讲的是"小生意故事"还是"高估值故事"。投资人和资本市场看的不只是你今天赚多少，而是你未来能长成多大、能复制多远、能不能形成品牌或平台效应。这一部分帮你看清你的企业是经营型、业务型、成长型、资本型，还是平台型。',
+    desc_en: 'Determines whether your company is telling a "small business story" or a "high-valuation story." Investors don\'t just care about today\'s revenue — they care about how big you can grow, how far you can replicate, and whether you can become a brand or platform. This section reveals whether you are an operator, a product company, a growth company, a fundable company, or a platform-grade business.',
     questions: [
       { id: 'Q21', zh: '增长方式？', en: 'Growth method?', type: 'single', options: [o('多开店/多开点','More locations'), o('增加销售团队','More sales'), o('增加经销商/渠道','More distributors'), o('产品升级与客户复购','Product upgrade'), o('平台化连接更多角色','Platform'), o('区域扩张/跨国复制','Regional expansion')] },
       { id: 'Q22', zh: '市场机会？', en: 'Market opportunity?', type: 'single', options: [o('目前还不清楚','Not clear'), o('本地刚需市场','Local necessity'), o('区域连锁机会','Regional chain'), o('全国性品牌机会','National brand'), o('东南亚机会','SEA'), o('全球性机会','Global')] },
@@ -71,7 +81,9 @@ export const SECTIONS: Section[] = [
     ],
   },
   {
-    key: 'e', zh: '融资结构', en: 'Financing',
+    key: 'e', zh: '融资结构', en: 'Financing Readiness',
+    desc_zh: '检测你的企业"能不能拿到投资人的钱"。这不只是想不想融资，而是股权清不清晰、财务规不规范、有没有BP、能不能讲资本故事、有没有投资人资源。哪怕你现在不打算融资，这一部分也能告诉你离资本市场还有多远。',
+    desc_en: 'Tests whether your company can actually receive investor money. This is not about whether you WANT to raise — it\'s about whether your equity structure is clean, your financials are properly kept, you have a pitch deck, you can tell a capital story, and you have access to investors. Even if you don\'t plan to fundraise now, this section shows how far you are from being capital-ready.',
     questions: [
       { id: 'Q26', zh: '股权结构清晰度？', en: 'Equity structure?', type: 'single', options: [o('没有','None'), o('大致有，但不清楚','Rough unclear'), o('基本清楚','Basically clear'), o('较清晰','Fairly clear'), o('非常清晰','Very clear')] },
       { id: 'Q27', zh: '股东类型？', en: 'Shareholder type?', type: 'single', options: [o('全部创始人持有','All founder'), o('有历史口头安排','Historical verbal'), o('有少量外部股东','Some external'), o('有2轮以上投资人','2+ rounds investors'), o('有多轮投资人+员工持股计划','Multi-round + ESOP')] },
@@ -83,7 +95,9 @@ export const SECTIONS: Section[] = [
     ],
   },
   {
-    key: 'f', zh: '退出与上市', en: 'Exit & Listing',
+    key: 'f', zh: '退出与上市', en: 'Exit & IPO Path',
+    desc_zh: '看你对企业"终点"的思考。绝大多数创始人只想"活下来"和"赚钱"，但真正能做大的企业，创始人会提前思考退出方式：是长期经营、股权交易、被并购，还是走向上市。这一部分判断你有没有想清楚未来的方向，以及你离上市这条路还有多远。',
+    desc_en: 'Reveals how you think about your company\'s endgame. Most founders only think about "surviving" and "making money," but founders who actually build big companies think early about the exit: long-term operation, equity sale, M&A, or IPO. This section checks whether you have a clear long-term direction and how far you are from a listing pathway.',
     questions: [
       { id: 'Q33', zh: '退出方向？', en: 'Exit direction?', type: 'single', options: [o('长期经营，不谈退出','Long-term no exit'), o('未来股权交易','Equity transaction'), o('未来兼并收购','M&A'), o('未来融资后再退出','Fundraise then exit'), o('未来上市退出','IPO exit')] },
       { id: 'Q34', zh: '上市准备状态？', en: 'IPO readiness?', type: 'single', options: [o('还非常早，不应现在讨论','Very early'), o('先把经营和模式跑顺','Fix operations first'), o('可以开始补治理/财务/股权基础','Start governance'), o('可以开始做上市前体检','Pre-IPO checkup'), o('已开始认真思考上市路径','Seriously considering IPO')] },

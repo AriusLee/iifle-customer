@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useT } from '@/lib/i18n';
+import { ListingRequirements } from './listing-requirements';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
 } from 'recharts';
@@ -134,6 +135,9 @@ export function Results({ diagnosticId, data, onRestart }: Props) {
           </CardContent>
         </Card>
       )}
+
+      {/* Listing requirements reference */}
+      <ListingRequirements enterpriseStage={stage} />
 
       {/* CTA */}
       <Card className="border-blue-200 bg-blue-50/30">
