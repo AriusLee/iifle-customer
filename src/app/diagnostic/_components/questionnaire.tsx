@@ -119,6 +119,9 @@ export function Questionnaire({ diagnosticId, onComplete }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-3xl" ref={topRef}>
+      {/* Full-screen scoring overlay — blocks all interaction while AI works */}
+      <ScoringOverlay open={scoring} sectionLabel={t(section.zh, section.en)} t={t} />
+
       {/* Section tabs */}
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm pb-3 pt-2 px-4">
         <div className="flex gap-1 overflow-x-auto pb-2">
@@ -279,6 +282,135 @@ function CheckSvg() {
     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
     </svg>
+  );
+}
+
+/* ── Scoring overlay ──────────────────────────────────────────────────────
+ * Full-screen blocking overlay shown while a section is being scored + the
+ * AI analysis is being generated. Cycles through a series of progress
+ * messages so the user sees the system is working through their answers
+ * rather than staring at a frozen button.
+ *
+ * Cannot be dismissed — disappears automatically when `open` flips false.
+ */
+function ScoringOverlay({
+  open,
+  sectionLabel,
+  t,
+}: {
+  open: boolean;
+  sectionLabel: string;
+  t: (zh: string, en: string) => string;
+}) {
+  const steps: { zh: string; en: string }[] = [
+    { zh: '正在收集你的回答…', en: 'Collecting your answers…' },
+    { zh: '正在结构化分析…', en: 'Structuring your responses…' },
+    { zh: '正在比对独角兽企业模型…', en: 'Comparing against the Unicorn model…' },
+    { zh: '正在生成评分…', en: 'Calculating module scores…' },
+    { zh: 'AI 顾问正在撰写洞察…', en: 'AI consultant is writing insights…' },
+    { zh: '即将完成…', en: 'Almost done…' },
+  ];
+  const [stepIdx, setStepIdx] = useState(0);
+
+  // Reset to first step whenever the overlay re-opens, then cycle every ~2.2s.
+  // Stay on the last step if the AI takes longer than expected.
+  useEffect(() => {
+    if (!open) {
+      setStepIdx(0);
+      return;
+    }
+    setStepIdx(0);
+    const id = setInterval(() => {
+      setStepIdx((i) => Math.min(i + 1, steps.length - 1));
+    }, 2200);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Lock body scroll while open
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-white/70 backdrop-blur-md"
+      // Block interaction with anything behind the overlay
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
+      role="alertdialog"
+      aria-modal="true"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <div className="mx-4 w-full max-w-sm rounded-2xl border border-emerald-100 bg-white p-8 shadow-2xl">
+        {/* Animated radial spinner */}
+        <div className="relative mx-auto mb-6 h-20 w-20">
+          <div className="absolute inset-0 rounded-full border-4 border-emerald-100" />
+          <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-emerald-500 border-r-emerald-500" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg className="h-8 w-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Title */}
+        <h3 className="mb-1 text-center text-base font-bold text-gray-900">
+          {t('正在分析你的回答', 'Analysing your answers')}
+        </h3>
+        <p className="mb-5 text-center text-xs text-gray-500">
+          {sectionLabel}
+        </p>
+
+        {/* Step list — current step highlighted, prior steps checked, future steps muted */}
+        <ul className="flex flex-col gap-2">
+          {steps.map((s, i) => {
+            const isDone = i < stepIdx;
+            const isCurrent = i === stepIdx;
+            return (
+              <li
+                key={i}
+                className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs transition-colors ${
+                  isCurrent ? 'bg-emerald-50 font-semibold text-emerald-700'
+                    : isDone ? 'text-gray-500'
+                    : 'text-gray-300'
+                }`}
+              >
+                <span className="flex h-4 w-4 items-center justify-center shrink-0">
+                  {isDone ? (
+                    <svg className="h-3.5 w-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : isCurrent ? (
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                    </span>
+                  ) : (
+                    <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
+                  )}
+                </span>
+                <span>{t(s.zh, s.en)}</span>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* Hint */}
+        <p className="mt-5 text-center text-[10px] text-gray-400">
+          {t('请勿关闭页面，分析通常需要 5–15 秒', 'Please do not close this page — analysis usually takes 5–15 seconds')}
+        </p>
+      </div>
+    </div>
   );
 }
 
