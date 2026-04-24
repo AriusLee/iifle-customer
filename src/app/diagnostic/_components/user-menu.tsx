@@ -40,24 +40,27 @@ export function UserMenu({ companyName, diagnosticId, onLogout }: Props) {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="cursor-pointer flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        className="cursor-pointer flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 backdrop-blur-sm px-2 py-1 pr-3 text-sm font-semibold text-slate-700 hover:border-[var(--gold)]/40 hover:bg-white transition-all shadow-sm"
       >
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700">
+        <div
+          className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white"
+          style={{ backgroundImage: 'linear-gradient(135deg, #c89749 0%, #8f6a2c 100%)' }}
+        >
           {displayName ? displayName[0].toUpperCase() : '?'}
         </div>
-        <span className="hidden sm:inline max-w-[120px] truncate">{displayName || t('菜单', 'Menu')}</span>
-        <svg className={`h-3.5 w-3.5 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <span className="hidden sm:inline max-w-[140px] truncate">{displayName || t('菜单', 'Menu')}</span>
+        <svg className={`h-3.5 w-3.5 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-56 rounded-xl border bg-white shadow-lg z-50 py-1 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.08)] z-50 py-1.5 overflow-hidden">
           {/* Company info */}
           {displayName && (
-            <div className="px-4 py-3 border-b">
-              <p className="text-xs text-gray-400">{t('企业', 'Company')}</p>
-              <p className="text-sm font-medium text-gray-800 truncate">{displayName}</p>
+            <div className="px-4 py-3 border-b border-slate-100">
+              <p className="eyebrow mb-0.5">{t('企业', 'Company')}</p>
+              <p className="text-sm font-semibold text-slate-900 truncate">{displayName}</p>
             </div>
           )}
 

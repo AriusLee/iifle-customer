@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { auth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -89,11 +91,20 @@ export default function DiagnosticPage() {
   const loggedIn = step !== 'auth' && step !== 'loading';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b">
-        <div className="mx-auto max-w-4xl flex items-center justify-between px-4 py-3">
-          <span className="text-lg font-bold text-emerald-600">IIFLE</span>
+    <div className="min-h-screen">
+      {/* Header — translucent, sits on the body's warm background */}
+      <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-200/80">
+        <div className="mx-auto max-w-5xl flex items-center justify-between px-4 py-3 gap-3">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
+            <Image
+              src="/iifle-logo.png"
+              alt="IIFLE"
+              width={120}
+              height={38}
+              priority
+              className="h-8 w-auto"
+            />
+          </Link>
           {loggedIn && (
             <div className="hidden sm:block">
               <PhaseNav active="diagnostic" battlemapUnlocked={battlemapUnlocked} />
@@ -111,7 +122,7 @@ export default function DiagnosticPage() {
         </div>
         {/* Mobile: phase nav wraps below on small screens */}
         {loggedIn && (
-          <div className="sm:hidden mx-auto max-w-4xl px-4 pb-3">
+          <div className="sm:hidden mx-auto max-w-5xl px-4 pb-3 flex justify-center">
             <PhaseNav active="diagnostic" battlemapUnlocked={battlemapUnlocked} />
           </div>
         )}

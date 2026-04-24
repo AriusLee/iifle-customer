@@ -122,32 +122,58 @@ export function Questionnaire({ diagnosticId, onComplete }: Props) {
       {/* Full-screen scoring overlay — blocks all interaction while AI works */}
       <ScoringOverlay open={scoring} sectionLabel={t(section.zh, section.en)} t={t} />
 
-      {/* Section tabs */}
-      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm pb-3 pt-2 px-4">
-        <div className="flex gap-1 overflow-x-auto pb-2">
+      {/* Section tabs — sticky under the page header */}
+      <div className="sticky top-[60px] z-10 -mx-4 px-4 pt-3 pb-3 bg-[#fafaf7]/90 backdrop-blur-md border-b border-slate-200/60">
+        <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1">
           {SECTIONS.map((s, i) => {
             const done = submitted.includes(s.key);
+            const active = i === curIdx;
             return (
-              <button key={s.key} onClick={() => { setCurIdx(i); scroll(); }}
-                className={`cursor-pointer flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all ${
-                  i === curIdx ? 'bg-emerald-500 text-white shadow-sm'
-                    : done ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                }`}>
-                <span className="font-bold">{s.key.toUpperCase()}</span>
+              <button
+                key={s.key}
+                onClick={() => { setCurIdx(i); scroll(); }}
+                className={`cursor-pointer flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all border ${
+                  active
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-[0_4px_12px_rgba(0,0,0,0.15)]'
+                    : done
+                      ? 'bg-[var(--gold-soft)] text-[var(--gold-dark)] border-[var(--gold)]/30 hover:bg-[var(--gold-soft)]/80'
+                      : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700'
+                }`}
+              >
+                <span
+                  className={`inline-flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${
+                    active ? 'bg-[var(--gold)] text-white'
+                      : done ? 'bg-[var(--gold)] text-white'
+                      : 'bg-slate-200 text-slate-600'
+                  }`}
+                >
+                  {s.key.toUpperCase()}
+                </span>
                 <span className="hidden sm:inline">{t(s.zh, s.en)}</span>
-                {done && i !== curIdx && <CheckSvg />}
+                {done && !active && <CheckSvg />}
               </button>
             );
           })}
         </div>
         {/* Progress */}
-        <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
-          <span>{t('已完成', 'Completed')} {submitted.length}/{SECTIONS.length} {t('分区', 'sections')}</span>
-          <span>{Math.round((submitted.length / SECTIONS.length) * 100)}%</span>
+        <div className="flex items-center justify-between text-[11px] mb-1.5">
+          <span className="text-slate-500">
+            {t('已完成', 'Completed')}{' '}
+            <span className="font-semibold text-slate-800">{submitted.length}/{SECTIONS.length}</span>{' '}
+            {t('分区', 'sections')}
+          </span>
+          <span className="font-semibold text-[var(--gold-dark)]">
+            {Math.round((submitted.length / SECTIONS.length) * 100)}%
+          </span>
         </div>
-        <div className="h-1.5 rounded-full bg-gray-200">
-          <div className="h-1.5 rounded-full bg-emerald-500 transition-all" style={{ width: `${(submitted.length / SECTIONS.length) * 100}%` }} />
+        <div className="h-1.5 rounded-full bg-slate-200/80 overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${(submitted.length / SECTIONS.length) * 100}%`,
+              backgroundImage: 'linear-gradient(90deg, var(--gold) 0%, var(--gold-dark) 100%)',
+            }}
+          />
         </div>
       </div>
 
@@ -171,104 +197,182 @@ export function Questionnaire({ diagnosticId, onComplete }: Props) {
       {/* Questions — hidden when submitted, unless editing */}
       {(!isSectionDone || editing) ? (
         <>
-          <Card className="mt-4">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-700">{sectionKey.toUpperCase()}</span>
-                <div>{t(section.zh, section.en)}</div>
-              </CardTitle>
-              <div className="ml-10 mt-2 rounded-lg bg-emerald-50/60 border border-emerald-100 px-3 py-2.5">
-                <p className="text-xs leading-relaxed text-gray-700">
-                  {t(section.desc_zh, section.desc_en)}
-                </p>
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-white shadow-[var(--shadow-soft)] overflow-hidden">
+            {/* Section header with gold accent */}
+            <div className="relative px-6 pt-6 pb-5 bg-gradient-to-br from-[var(--gold-soft)]/40 via-white to-white border-b border-slate-100">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[var(--gold)]" />
+              <div className="flex items-center gap-3 mb-2.5">
+                <span
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold text-white"
+                  style={{ backgroundImage: 'linear-gradient(135deg, #c89749 0%, #8f6a2c 100%)' }}
+                >
+                  {sectionKey.toUpperCase()}
+                </span>
+                <h2 className="font-display text-xl font-bold text-slate-900">
+                  {t(section.zh, section.en)}
+                </h2>
               </div>
-              <p className="text-xs text-gray-400 ml-10 mt-2">
-                {answeredInSection}/{section.questions.length} {t('已回答', 'answered')}
+              <p className="text-xs leading-relaxed text-slate-600 max-w-2xl">
+                {t(section.desc_zh, section.desc_en)}
               </p>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-6">
+              <p className="mt-3 text-[11px] font-semibold text-slate-500">
+                <span className="text-[var(--gold-dark)]">{answeredInSection}</span>
+                <span className="text-slate-400"> / {section.questions.length} </span>
+                {t('已回答', 'answered')}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-7 p-6">
               {section.questions.map((q, qi) => {
                 const val = answers[q.id] || (q.type === 'multi' ? [] : '');
                 return (
                   <div key={q.id}>
-                    <p className="text-sm font-medium mb-1">
-                      <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">{qi + 1}</span>
+                    <p className="text-sm font-semibold mb-1.5 text-slate-900 leading-relaxed">
+                      <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white">
+                        {qi + 1}
+                      </span>
                       {t(q.zh, q.en)}
                     </p>
                     {q.type === 'multi' && q.maxSelect && (
-                      <p className="ml-7 mb-1 text-xs text-emerald-600">{t(`最多选择${q.maxSelect}项`, `Select up to ${q.maxSelect}`)}</p>
+                      <p className="ml-7 mb-1.5 text-[11px] font-medium text-[var(--gold-dark)]">
+                        {t(`最多选择 ${q.maxSelect} 项`, `Select up to ${q.maxSelect}`)}
+                      </p>
                     )}
                     <div className="ml-7 flex flex-col gap-1.5">
                       {q.options.map((opt) => {
                         const selected = q.type === 'single' ? val === opt.value : Array.isArray(val) && val.includes(opt.value);
                         return (
-                          <label key={opt.value} className={`cursor-pointer flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-colors ${selected ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'}`}>
-                            <input type={q.type === 'single' ? 'radio' : 'checkbox'} name={q.id} checked={selected}
+                          <label
+                            key={opt.value}
+                            className={`cursor-pointer flex items-center gap-3 rounded-lg border px-3.5 py-2.5 text-sm transition-all ${
+                              selected
+                                ? 'border-[var(--gold)] bg-[var(--gold-soft)]/50 shadow-sm'
+                                : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <input
+                              type={q.type === 'single' ? 'radio' : 'checkbox'}
+                              name={q.id}
+                              checked={selected}
                               onChange={() => q.type === 'single' ? pick(q.id, opt.value) : pickMulti(q, opt.value)}
-                              className="cursor-pointer accent-emerald-500" />
-                            <span className="text-gray-800">{t(opt.zh, opt.en)}</span>
+                              className="cursor-pointer accent-[var(--gold)]"
+                            />
+                            <span className={selected ? 'font-medium text-slate-900' : 'text-slate-700'}>
+                              {t(opt.zh, opt.en)}
+                            </span>
                           </label>
                         );
                       })}
-                      <label className={`cursor-pointer flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-colors ${val === '__other__' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'}`}>
-                        <input type="radio" name={q.id} checked={val === '__other__'}
+                      <label
+                        className={`cursor-pointer flex items-center gap-3 rounded-lg border px-3.5 py-2.5 text-sm transition-all ${
+                          val === '__other__'
+                            ? 'border-[var(--gold)] bg-[var(--gold-soft)]/50 shadow-sm'
+                            : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name={q.id}
+                          checked={val === '__other__'}
                           onChange={() => pick(q.id, '__other__')}
-                          className="cursor-pointer accent-emerald-500" />
-                        <span className="text-gray-800">{t('其他', 'Other')}</span>
+                          className="cursor-pointer accent-[var(--gold)]"
+                        />
+                        <span className="text-slate-700">{t('其他', 'Other')}</span>
                       </label>
                       {val === '__other__' && (
-                        <Input placeholder={t('请输入...', 'Please specify...')} value={otherText[q.id] || ''} onChange={(e) => setOtherText((p) => ({ ...p, [q.id]: e.target.value }))} className="h-8 text-sm ml-6" />
+                        <Input
+                          placeholder={t('请输入...', 'Please specify...')}
+                          value={otherText[q.id] || ''}
+                          onChange={(e) => setOtherText((p) => ({ ...p, [q.id]: e.target.value }))}
+                          className="h-9 text-sm ml-6"
+                        />
                       )}
                     </div>
                   </div>
                 );
               })}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Actions bar — visible when editing/answering */}
-          <div className="sticky bottom-0 flex items-center justify-between gap-3 bg-white/95 backdrop-blur-sm py-4 px-4 mt-4 border-t">
-            <Button variant="outline" onClick={goPrev} disabled={curIdx === 0} className="cursor-pointer h-10 px-5">
+          {/* Actions bar — sticky footer while answering */}
+          <div className="sticky bottom-0 flex items-center justify-between gap-3 bg-white/90 backdrop-blur-md py-3 px-4 mt-4 border-t border-slate-200 -mx-4">
+            <Button
+              variant="outline"
+              onClick={goPrev}
+              disabled={curIdx === 0}
+              className="cursor-pointer h-10 px-5 rounded-lg"
+            >
               ← {t('上一步', 'Back')}
             </Button>
 
-            <Button variant="ghost" onClick={() => { saveDraft(); toast.success(t('已保存', 'Saved')); }} disabled={saving}
-              className="cursor-pointer h-10 text-xs text-gray-500">
-              {saving ? t('保存中...', 'Saving...') : t('保存草稿', 'Save Draft')}
+            <Button
+              variant="ghost"
+              onClick={() => { saveDraft(); toast.success(t('已保存', 'Saved')); }}
+              disabled={saving}
+              className="cursor-pointer h-10 text-xs text-slate-500 hover:text-slate-700"
+            >
+              {saving ? t('保存中…', 'Saving…') : t('保存草稿', 'Save Draft')}
             </Button>
 
             <div className="flex items-center gap-2">
               {editing && (
-                <Button variant="outline" onClick={() => setEditing(false)} className="cursor-pointer h-10 px-5">
+                <Button
+                  variant="outline"
+                  onClick={() => setEditing(false)}
+                  className="cursor-pointer h-10 px-5 rounded-lg"
+                >
                   {t('取消', 'Cancel')}
                 </Button>
               )}
               {allAnswered && (
-                <Button onClick={handleSubmitSection} disabled={scoring}
-                  className="cursor-pointer h-10 bg-emerald-500 text-white hover:bg-emerald-600 rounded-lg font-semibold px-6">
-                  {scoring ? t('评分中...', 'Scoring...') : isSectionDone ? t('重新评分', 'Re-score') : t('提交并评分', 'Submit & Score')}
-                </Button>
+                <button
+                  type="button"
+                  onClick={handleSubmitSection}
+                  disabled={scoring}
+                  className="btn-primary h-10 px-6"
+                >
+                  {scoring
+                    ? t('评分中…', 'Scoring…')
+                    : isSectionDone
+                      ? t('重新评分', 'Re-score')
+                      : t('提交并评分 →', 'Submit & Score →')}
+                </button>
               )}
               {!allAnswered && !isSectionDone && (
-                <span className="text-xs text-gray-400">{t('回答所有问题后提交', 'Answer all to submit')}</span>
+                <span className="text-xs text-slate-400">
+                  {t('回答所有问题后提交', 'Answer all to submit')}
+                </span>
               )}
             </div>
           </div>
         </>
       ) : (
         /* Submitted state — collapsed view with re-answer + next buttons */
-        <div className="mt-4 flex items-center justify-between gap-3 px-4">
-          <Button variant="outline" onClick={goPrev} disabled={curIdx === 0} className="cursor-pointer h-10 px-5">
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <Button
+            variant="outline"
+            onClick={goPrev}
+            disabled={curIdx === 0}
+            className="cursor-pointer h-10 px-5 rounded-lg"
+          >
             ← {t('上一步', 'Back')}
           </Button>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => setEditing(true)} className="cursor-pointer h-10 px-5">
+            <Button
+              variant="outline"
+              onClick={() => setEditing(true)}
+              className="cursor-pointer h-10 px-5 rounded-lg"
+            >
               {t('重新作答', 'Re-answer')}
             </Button>
             {curIdx < SECTIONS.length - 1 && (
-              <Button onClick={goNext} className="cursor-pointer h-10 bg-emerald-500 text-white hover:bg-emerald-600 rounded-lg font-semibold px-6">
-                {t('下一步', 'Next')} →
-              </Button>
+              <button
+                type="button"
+                onClick={goNext}
+                className="btn-primary h-10 px-6"
+              >
+                {t('下一分区', 'Next section')} →
+              </button>
             )}
           </div>
         </div>

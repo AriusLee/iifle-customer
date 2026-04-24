@@ -110,94 +110,122 @@ export function BattleMapQuestionnaire({ battleMapId, initial, onClassified }: P
     <div className="mx-auto w-full max-w-3xl" ref={topRef}>
       <AnalyzeOverlay open={submittingSection} sectionLabel={t(section.zh, section.en)} t={t} />
 
-      {/* Section tabs */}
-      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm pb-3 pt-2 px-4">
-        <div className="flex gap-1 overflow-x-auto pb-2">
+      {/* Section tabs — sticky under page header */}
+      <div className="sticky top-[60px] z-10 -mx-4 px-4 pt-3 pb-3 bg-[#fafaf7]/90 backdrop-blur-md border-b border-slate-200/60">
+        <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1">
           {BM_SECTIONS.map((s, i) => {
             const done = submitted.includes(s.key);
+            const active = i === curIdx;
             return (
               <button
                 key={s.key}
                 onClick={() => { setCurIdx(i); scroll(); }}
-                className={`cursor-pointer flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all ${
-                  i === curIdx ? 'bg-emerald-500 text-white shadow-sm'
-                    : done ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                className={`cursor-pointer flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all border ${
+                  active
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-[0_4px_12px_rgba(0,0,0,0.15)]'
+                    : done
+                      ? 'bg-[var(--gold-soft)] text-[var(--gold-dark)] border-[var(--gold)]/30 hover:bg-[var(--gold-soft)]/80'
+                      : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700'
                 }`}
               >
-                <span className="font-bold">{s.key.toUpperCase()}</span>
+                <span
+                  className={`inline-flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${
+                    active || done ? 'bg-[var(--gold)] text-white' : 'bg-slate-200 text-slate-600'
+                  }`}
+                >
+                  {s.key.toUpperCase()}
+                </span>
                 <span className="hidden sm:inline">{t(s.zh, s.en)}</span>
-                {done && i !== curIdx && <CheckSvg />}
+                {done && !active && <CheckSvg />}
               </button>
             );
           })}
         </div>
-        <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
-          <span>
-            {t('已提交', 'Submitted')} {submitted.length}/{BM_SECTIONS.length} {t('分区', 'sections')} ·{' '}
-            {totalAnswered}/{BM_TOTAL_QUESTIONS} {t('题', 'questions')}
+        <div className="flex items-center justify-between text-[11px] mb-1.5">
+          <span className="text-slate-500">
+            {t('已提交', 'Submitted')}{' '}
+            <span className="font-semibold text-slate-800">{submitted.length}/{BM_SECTIONS.length}</span>{' '}
+            {t('分区', 'sections')}{' '}
+            <span className="text-slate-300">·</span>{' '}
+            <span className="font-semibold text-slate-800">{totalAnswered}/{BM_TOTAL_QUESTIONS}</span>{' '}
+            {t('题', 'questions')}
           </span>
-          <span>{Math.round((submitted.length / BM_SECTIONS.length) * 100)}%</span>
+          <span className="font-semibold text-[var(--gold-dark)]">
+            {Math.round((submitted.length / BM_SECTIONS.length) * 100)}%
+          </span>
         </div>
-        <div className="h-1.5 rounded-full bg-gray-200">
+        <div className="h-1.5 rounded-full bg-slate-200/80 overflow-hidden">
           <div
-            className="h-1.5 rounded-full bg-emerald-500 transition-all"
-            style={{ width: `${(submitted.length / BM_SECTIONS.length) * 100}%` }}
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${(submitted.length / BM_SECTIONS.length) * 100}%`,
+              backgroundImage: 'linear-gradient(90deg, var(--gold) 0%, var(--gold-dark) 100%)',
+            }}
           />
         </div>
       </div>
 
       {/* Inline AI analysis — shown after section is submitted */}
       {isSectionDone && analysis && (analysis.analysis_zh || analysis.analysis_en) && (
-        <Card className="mt-4 border-emerald-200 bg-gradient-to-br from-emerald-50/50 to-white">
-          <CardContent className="pt-5 pb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100">
-                <svg className="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-semibold">{t('AI 顾问分析', 'AI Consultant Analysis')}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {t(section.zh, section.en)} · {t('基于你的回答与 Phase 1 阶段定位', 'Based on your answers + Phase 1 stage')}
-                </p>
-              </div>
+        <div className="mt-5 rounded-2xl border border-[var(--gold)]/25 bg-gradient-to-br from-[var(--gold-soft)]/40 via-white to-white p-5 shadow-[var(--shadow-soft)]">
+          <div className="flex items-start gap-3 mb-4">
+            <div
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-white shrink-0"
+              style={{ backgroundImage: 'linear-gradient(135deg, #c89749 0%, #8f6a2c 100%)' }}
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
             </div>
-            <StructuredAnalysis text={t(analysis.analysis_zh || '', analysis.analysis_en || '')} />
-          </CardContent>
-        </Card>
+            <div>
+              <p className="eyebrow mb-0.5">{t('AI 顾问分析', 'AI Consultant Analysis')}</p>
+              <p className="text-sm font-semibold text-slate-900">{t(section.zh, section.en)}</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {t('基于你的回答与 Phase 1 阶段定位', 'Based on your answers + Phase 1 stage')}
+              </p>
+            </div>
+          </div>
+          <StructuredAnalysis text={t(analysis.analysis_zh || '', analysis.analysis_en || '')} />
+        </div>
       )}
 
       {/* Questions (hidden when submitted, unless editing) */}
       {showQuestions ? (
         <>
-          <Card className="mt-4">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-700">
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-white shadow-[var(--shadow-soft)] overflow-hidden">
+            {/* Section header with gold accent */}
+            <div className="relative px-6 pt-6 pb-5 bg-gradient-to-br from-[var(--gold-soft)]/40 via-white to-white border-b border-slate-100">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[var(--gold)]" />
+              <div className="flex items-center gap-3 mb-2.5">
+                <span
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold text-white"
+                  style={{ backgroundImage: 'linear-gradient(135deg, #c89749 0%, #8f6a2c 100%)' }}
+                >
                   {section.key.toUpperCase()}
                 </span>
-                <div>{t(section.zh, section.en)}</div>
-              </CardTitle>
-              <div className="ml-10 mt-2 rounded-lg bg-emerald-50/60 border border-emerald-100 px-3 py-2.5">
-                <p className="text-xs leading-relaxed text-gray-700">
-                  {t(section.desc_zh, section.desc_en)}
-                </p>
+                <h2 className="font-display text-xl font-bold text-slate-900">
+                  {t(section.zh, section.en)}
+                </h2>
               </div>
-              <p className="text-xs text-gray-400 ml-10 mt-2">
-                {answeredInSection}/{section.questions.length} {t('已回答', 'answered')}
+              <p className="text-xs leading-relaxed text-slate-600 max-w-2xl">
+                {t(section.desc_zh, section.desc_en)}
               </p>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-6">
+              <p className="mt-3 text-[11px] font-semibold text-slate-500">
+                <span className="text-[var(--gold-dark)]">{answeredInSection}</span>
+                <span className="text-slate-400"> / {section.questions.length} </span>
+                {t('已回答', 'answered')}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-7 p-6">
               {section.questions.map((q, qi) => {
                 const val = answers[q.id] || '';
 
                 if (q.kind === 'open') {
                   return (
                     <div key={q.id}>
-                      <p className="text-sm font-medium mb-1">
-                        <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
+                      <p className="text-sm font-semibold mb-1.5 text-slate-900 leading-relaxed">
+                        <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white">
                           {qi + 1}
                         </span>
                         {t(q.zh, q.en)}
@@ -207,7 +235,7 @@ export function BattleMapQuestionnaire({ battleMapId, initial, onClassified }: P
                           value={val}
                           onChange={(e) => setAnswers((p) => ({ ...p, [q.id]: e.target.value }))}
                           placeholder={t(q.placeholder_zh || '', q.placeholder_en || '')}
-                          className="w-full min-h-[80px] rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                          className="w-full min-h-[96px] rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[var(--gold)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/20 transition-all"
                         />
                       </div>
                     </div>
@@ -216,8 +244,8 @@ export function BattleMapQuestionnaire({ battleMapId, initial, onClassified }: P
 
                 return (
                   <div key={q.id}>
-                    <p className="text-sm font-medium mb-1">
-                      <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
+                    <p className="text-sm font-semibold mb-1.5 text-slate-900 leading-relaxed">
+                      <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white">
                         {qi + 1}
                       </span>
                       {t(q.zh, q.en)}
@@ -228,8 +256,10 @@ export function BattleMapQuestionnaire({ battleMapId, initial, onClassified }: P
                         return (
                           <label
                             key={opt.value}
-                            className={`cursor-pointer flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-colors ${
-                              selected ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'
+                            className={`cursor-pointer flex items-center gap-3 rounded-lg border px-3.5 py-2.5 text-sm transition-all ${
+                              selected
+                                ? 'border-[var(--gold)] bg-[var(--gold-soft)]/50 shadow-sm'
+                                : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                             }`}
                           >
                             <input
@@ -237,9 +267,11 @@ export function BattleMapQuestionnaire({ battleMapId, initial, onClassified }: P
                               name={q.id}
                               checked={selected}
                               onChange={() => pick(q.id, opt.value)}
-                              className="cursor-pointer accent-emerald-500"
+                              className="cursor-pointer accent-[var(--gold)]"
                             />
-                            <span className="text-gray-800">{t(opt.zh, opt.en)}</span>
+                            <span className={selected ? 'font-medium text-slate-900' : 'text-slate-700'}>
+                              {t(opt.zh, opt.en)}
+                            </span>
                           </label>
                         );
                       })}
@@ -247,16 +279,16 @@ export function BattleMapQuestionnaire({ battleMapId, initial, onClassified }: P
                   </div>
                 );
               })}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Footer — while answering/editing */}
-          <div className="sticky bottom-0 flex items-center justify-between gap-3 bg-white/95 backdrop-blur-sm py-4 px-4 mt-4 border-t">
+          <div className="sticky bottom-0 flex items-center justify-between gap-3 bg-white/90 backdrop-blur-md py-3 px-4 mt-4 border-t border-slate-200 -mx-4">
             <Button
               variant="outline"
               onClick={goPrev}
               disabled={curIdx === 0}
-              className="cursor-pointer h-10 px-5"
+              className="cursor-pointer h-10 px-5 rounded-lg"
             >
               ← {t('上一步', 'Back')}
             </Button>
@@ -265,9 +297,9 @@ export function BattleMapQuestionnaire({ battleMapId, initial, onClassified }: P
               variant="ghost"
               onClick={() => { saveDraft(); toast.success(t('已保存', 'Saved')); }}
               disabled={saving}
-              className="cursor-pointer h-10 text-xs text-gray-500"
+              className="cursor-pointer h-10 text-xs text-slate-500 hover:text-slate-700"
             >
-              {saving ? t('保存中...', 'Saving...') : t('保存草稿', 'Save Draft')}
+              {saving ? t('保存中…', 'Saving…') : t('保存草稿', 'Save Draft')}
             </Button>
 
             <div className="flex items-center gap-2">
@@ -275,26 +307,27 @@ export function BattleMapQuestionnaire({ battleMapId, initial, onClassified }: P
                 <Button
                   variant="outline"
                   onClick={() => setEditing(false)}
-                  className="cursor-pointer h-10 px-5"
+                  className="cursor-pointer h-10 px-5 rounded-lg"
                 >
                   {t('取消', 'Cancel')}
                 </Button>
               )}
               {sectionAllAnswered && canSubmitSection && (
-                <Button
+                <button
+                  type="button"
                   onClick={handleSubmitSection}
                   disabled={submittingSection}
-                  className="cursor-pointer h-10 bg-emerald-500 text-white hover:bg-emerald-600 rounded-lg font-semibold px-6"
+                  className="btn-primary h-10 px-6"
                 >
                   {submittingSection
-                    ? t('分析中...', 'Analyzing...')
+                    ? t('分析中…', 'Analyzing…')
                     : isSectionDone
                       ? t('重新分析', 'Re-analyze')
-                      : t('提交并分析', 'Submit & analyze')}
-                </Button>
+                      : t('提交并分析 →', 'Submit & analyze →')}
+                </button>
               )}
               {!sectionAllAnswered && (
-                <span className="text-xs text-gray-400">{t('回答所有问题后提交', 'Answer all to submit')}</span>
+                <span className="text-xs text-slate-400">{t('回答所有问题后提交', 'Answer all to submit')}</span>
               )}
               {!canSubmitSection && (
                 <span className="text-xs text-gray-400">
@@ -306,12 +339,12 @@ export function BattleMapQuestionnaire({ battleMapId, initial, onClassified }: P
         </>
       ) : (
         /* Submitted view — collapsed with re-answer + next buttons */
-        <div className="mt-4 flex items-center justify-between gap-3 px-4">
+        <div className="mt-5 flex items-center justify-between gap-3">
           <Button
             variant="outline"
             onClick={goPrev}
             disabled={curIdx === 0}
-            className="cursor-pointer h-10 px-5"
+            className="cursor-pointer h-10 px-5 rounded-lg"
           >
             ← {t('上一步', 'Back')}
           </Button>
@@ -319,17 +352,18 @@ export function BattleMapQuestionnaire({ battleMapId, initial, onClassified }: P
             <Button
               variant="outline"
               onClick={() => setEditing(true)}
-              className="cursor-pointer h-10 px-5"
+              className="cursor-pointer h-10 px-5 rounded-lg"
             >
               {t('重新作答', 'Re-answer')}
             </Button>
             {curIdx < BM_SECTIONS.length - 1 && (
-              <Button
+              <button
+                type="button"
                 onClick={goNext}
-                className="cursor-pointer h-10 bg-emerald-500 text-white hover:bg-emerald-600 rounded-lg font-semibold px-6"
+                className="btn-primary h-10 px-6"
               >
                 {t('下一分区', 'Next section')} →
-              </Button>
+              </button>
             )}
           </div>
         </div>

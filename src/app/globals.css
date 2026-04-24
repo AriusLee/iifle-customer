@@ -4,11 +4,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ──────────────── Brand tokens ────────────────
+   IIFLE palette matches the logo's gold (#b8893e) + the PDF cover accent.
+   Emerald remains for primary action/CTA; gold for brand moments (eyebrows,
+   section indexes, "prepared for" labels). Ink scale from shadcn-slate. */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -29,6 +34,20 @@
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
+
+  /* Brand tokens exposed as Tailwind arbitrary-value-friendly vars. Use via
+     text-[var(--gold)] / bg-[var(--gold)] or the named utility classes below. */
+  --color-gold: var(--gold);
+  --color-gold-dark: var(--gold-dark);
+  --color-gold-soft: var(--gold-soft);
+  --color-emerald-brand: var(--emerald-brand);
+
+  /* Elevation scale — soft, multi-layer shadows so cards feel lifted but
+     never "heavy". Use on hero CTA / primary cards / popovers. */
+  --shadow-soft: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 12px rgba(16, 24, 40, 0.04);
+  --shadow-lift: 0 1px 3px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.06);
+  --shadow-glow-emerald: 0 8px 24px rgba(16, 185, 129, 0.25);
+  --shadow-glow-gold:    0 8px 24px rgba(184, 137, 62, 0.22);
 }
 
 :root {
@@ -51,9 +70,133 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --radius: 0.625rem;
+
+  /* Brand */
+  --gold: #b8893e;
+  --gold-dark: #8f6a2c;
+  --gold-soft: #f4ead8;
+  --emerald-brand: #10b981;
 }
 
 @layer base {
-  * { @apply border-border outline-ring/50; }
-  body { @apply bg-background text-foreground; }
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  /* Layered off-white background with a very subtle warm tint so the portal
+     never feels like a blank developer canvas. Fixed attachment prevents
+     the gradient from scrolling with the page. */
+  body {
+    @apply bg-background text-foreground font-sans;
+    background-color: #fafaf7;
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(184, 137, 62, 0.05) 0%, transparent 45%),
+      radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.04) 0%, transparent 45%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    font-feature-settings: "ss01", "cv11", "calt";
+  }
+
+  /* Serif display utility — used for big titles. Falls back to Georgia on
+     older/stricter CJK systems. */
+  .font-display {
+    font-family: var(--font-serif), "Georgia", "Noto Serif SC", "Source Han Serif SC", serif;
+    font-feature-settings: "ss01";
+  }
+}
+
+/* ──────────────── Brand components ────────────────
+   Plain CSS instead of @apply — Tailwind 4's JIT doesn't always surface
+   custom classes compiled via @layer components + @apply, so these use
+   explicit declarations to guarantee the styles ship. */
+
+.card-gold-accent {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-left-color: var(--gold);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Primary CTA — emerald gradient + glow. */
+.btn-primary {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  background-image: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  box-shadow: var(--shadow-glow-emerald);
+  border: none;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(16, 185, 129, 0.32);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Gold variant — secondary CTA / "brand moment" button. */
+.btn-gold {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  background-image: linear-gradient(180deg, #c89749 0%, #8f6a2c 100%);
+  box-shadow: var(--shadow-glow-gold);
+  border: none;
+  text-decoration: none;
+}
+.btn-gold:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(184, 137, 62, 0.30);
+}
+.btn-gold:active { transform: translateY(0); }
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  letter-spacing: 0.2em;
+}
+
+.ornament-diamonds {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.ornament-diamonds .rule {
+  width: 28px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.5;
+}
+.ornament-diamonds .diamond {
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  transform: rotate(45deg);
+  display: inline-block;
 }

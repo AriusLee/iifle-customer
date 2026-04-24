@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { api } from '@/lib/api';
 import { useT } from '@/lib/i18n';
 import { BM_VARIANTS } from '@/lib/battlemap-questions';
@@ -13,10 +11,22 @@ interface Props {
   onStarted: () => void | Promise<void>;
 }
 
-const VARIANT_COLOR: Record<string, string> = {
-  replication: 'border-amber-200 bg-amber-50/60',
-  financing: 'border-blue-200 bg-blue-50/60',
-  capitalization: 'border-emerald-200 bg-emerald-50/60',
+const VARIANT_ACCENT: Record<string, { bar: string; soft: string; text: string }> = {
+  replication: {
+    bar: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
+    soft: 'rgba(245, 158, 11, 0.1)',
+    text: '#b45309',
+  },
+  financing: {
+    bar: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)',
+    soft: 'rgba(59, 130, 246, 0.08)',
+    text: '#1e40af',
+  },
+  capitalization: {
+    bar: 'linear-gradient(135deg, #10b981 0%, #065f46 100%)',
+    soft: 'rgba(16, 185, 129, 0.08)',
+    text: '#065f46',
+  },
 };
 
 export function BattleMapIntro({ diagnosticId, onStarted }: Props) {
@@ -36,51 +46,103 @@ export function BattleMapIntro({ diagnosticId, onStarted }: Props) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl flex flex-col gap-5">
-      <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50/50 to-white">
-        <CardHeader>
-          <CardTitle className="text-lg">
-            {t('战略作战图', 'Strategic Battle Map')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <p className="text-sm leading-relaxed text-gray-700">
+    <div className="mx-auto w-full max-w-3xl flex flex-col gap-6">
+      {/* Hero */}
+      <div className="relative rounded-3xl border border-slate-200 bg-white p-8 overflow-hidden shadow-[var(--shadow-soft)]">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[var(--gold-soft)]/30 via-white to-white" />
+        <div className="pointer-events-none absolute top-0 left-0 w-24 h-24 border-t-2 border-l-2 border-[var(--gold)]/40 rounded-tl-3xl" />
+        <div className="pointer-events-none absolute bottom-0 right-0 w-24 h-24 border-b-2 border-r-2 border-[var(--gold)]/40 rounded-br-3xl" />
+
+        <div className="relative">
+          <p className="eyebrow mb-3">{t('Phase 1.5 · 战略作战图', 'Phase 1.5 · Battle Map')}</p>
+          <h2 className="font-display text-3xl font-bold text-slate-900 leading-tight mb-3">
+            {t('下一阶段怎么打，', 'How to level up')}
+            <br />
+            <span className="text-[var(--gold-dark)]">
+              {t('AI 为你量身定制', 'tailored for you by AI')}
+            </span>
+          </h2>
+          <p className="text-sm leading-relaxed text-slate-600 max-w-xl">
             {t(
               'Phase 1 告诉你"你在哪里、卡在哪里"。战略作战图进一步告诉你：下一阶段怎么打、用什么顺序打、90 天开始做什么。',
-              'Phase 1 tells you where you are and what\'s stuck. The battle map tells you how to level up next, in what order, and what to start in 90 days.',
+              'Phase 1 told you where you are and what\'s stuck. The battle map tells you how to level up — in what order, and what to start in 90 days.',
             )}
           </p>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {Object.values(BM_VARIANTS).map((v) => (
-              <div key={v.key} className={`rounded-lg border p-3 ${VARIANT_COLOR[v.key]}`}>
-                <p className="text-xs font-bold">{t(v.name_zh, v.name_en)}</p>
-                <p className="text-[11px] mt-1 leading-snug text-gray-600">
-                  {t(v.subtitle_zh, v.subtitle_en)}
-                </p>
+        </div>
+      </div>
+
+      {/* Variant preview */}
+      <div>
+        <div className="flex items-baseline justify-between mb-3 px-1">
+          <p className="eyebrow">{t('三种作战图 · 自动匹配', 'Three variants · auto-matched')}</p>
+          <p className="text-[11px] text-slate-400">{t('AI 从中选择一份', 'AI picks one for you')}</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {Object.values(BM_VARIANTS).map((v, i) => {
+            const accent = VARIANT_ACCENT[v.key] || VARIANT_ACCENT.replication;
+            return (
+              <div
+                key={v.key}
+                className="relative rounded-2xl border border-slate-200 bg-white p-4 overflow-hidden shadow-[var(--shadow-soft)] transition-transform duration-200 hover:-translate-y-0.5"
+              >
+                <div
+                  className="absolute top-0 left-0 right-0 h-1"
+                  style={{ backgroundImage: accent.bar }}
+                />
+                <div className="pt-2">
+                  <p className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: accent.text }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </p>
+                  <p className="text-sm font-bold text-slate-900 mb-1.5">
+                    {t(v.name_zh, v.name_en)}
+                  </p>
+                  <p className="text-[11px] leading-snug text-slate-500">
+                    {t(v.subtitle_zh, v.subtitle_en)}
+                  </p>
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="rounded-lg bg-white border border-emerald-100 p-3">
-            <p className="text-xs text-gray-700 leading-relaxed">
-              <strong className="font-semibold">{t('如何工作', 'How it works')}：</strong>{' '}
-              {t(
-                '回答 35 道问题（约 15 分钟）。AI 会结合 Phase 1 的六大结构分数，从上方三种作战图中为你匹配最合适的一份，并生成 10 章量身定制的作战方案。',
-                '35 questions (~15 min). AI combines them with your Phase 1 six-structure scores and picks the right battle map variant — then generates a 10-chapter tailored playbook.',
-              )}
-            </p>
-          </div>
-          <div className="flex items-center justify-end">
-            <Button
-              onClick={handleStart}
-              disabled={creating}
-              className="cursor-pointer h-10 bg-emerald-500 text-white hover:bg-emerald-600 rounded-lg font-semibold px-6"
-            >
-              {creating ? t('正在创建...', 'Creating...') : t('开始作战图问卷', 'Start battle map questionnaire')}
-              <span className="ml-1">→</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* How it works + CTA */}
+      <div className="card-gold-accent p-6">
+        <p className="eyebrow mb-2">{t('如何工作', 'How it works')}</p>
+        <div className="grid gap-3 sm:grid-cols-3 mb-5">
+          {[
+            { zh: '回答 35 道问题', en: '35 questions', hint: t('约 15 分钟', '~15 min') },
+            { zh: 'AI 分区分析', en: 'Section-by-section AI analysis', hint: t('8 个分区', '8 sections') },
+            { zh: '自动匹配作战图', en: 'Auto-matched battle map', hint: t('Phase 1 分数 + 意图', 'Phase 1 scores + intent') },
+          ].map((step, i) => (
+            <div key={i} className="flex items-start gap-2.5">
+              <span
+                className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0 mt-0.5"
+                style={{ backgroundImage: 'linear-gradient(135deg, #c89749 0%, #8f6a2c 100%)' }}
+              >
+                {i + 1}
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{t(step.zh, step.en)}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{step.hint}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100">
+          <p className="text-xs text-slate-500">
+            {t('随时保存进度，可中途退出', 'Auto-saves · resume anytime')}
+          </p>
+          <button
+            type="button"
+            onClick={handleStart}
+            disabled={creating}
+            className="btn-primary h-11 px-6 text-base"
+          >
+            {creating ? t('正在创建…', 'Creating…') : t('开始作战图问卷 →', 'Start battle map →')}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

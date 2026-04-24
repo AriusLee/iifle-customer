@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { auth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { useT } from '@/lib/i18n';
@@ -61,12 +62,19 @@ export default function BattleMapPage() {
   const showPhaseNav = loggedIn && step !== 'needs-phase1';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white border-b">
-        <div className="mx-auto max-w-4xl flex items-center justify-between px-4 py-3">
-          <Link href="/diagnostic" className="cursor-pointer text-lg font-bold text-emerald-600">
-            IIFLE
+      <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-200/80">
+        <div className="mx-auto max-w-5xl flex items-center justify-between px-4 py-3 gap-3">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
+            <Image
+              src="/iifle-logo.png"
+              alt="IIFLE"
+              width={120}
+              height={38}
+              priority
+              className="h-8 w-auto"
+            />
           </Link>
           {showPhaseNav && (
             <div className="hidden sm:block">
@@ -85,7 +93,7 @@ export default function BattleMapPage() {
         </div>
         {/* Mobile — nav wraps below on small screens */}
         {showPhaseNav && (
-          <div className="sm:hidden mx-auto max-w-4xl px-4 pb-3">
+          <div className="sm:hidden mx-auto max-w-5xl px-4 pb-3 flex justify-center">
             <PhaseNav active="battlemap" battlemapUnlocked={true} />
           </div>
         )}
