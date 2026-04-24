@@ -46,4 +46,16 @@ export const api = {
     generateReport: (id: string) =>
       f<any>(`/diagnostics/${id}/generate-report`, { method: 'POST' }),
   },
+  battlemaps: {
+    // Customer surface: create, read, per-section submit. Report generation
+    // and the 10-chapter viewer live only in the advisor dashboard.
+    createForDiagnostic: (diagnosticId: string) =>
+      f<any>(`/diagnostics/${diagnosticId}/battlemap`, { method: 'POST' }),
+    listMine: () => f<any[]>('/battlemaps/mine'),
+    get: (id: string) => f<any>(`/battlemaps/${id}`),
+    saveDraft: (id: string, data: { answers: Record<string, string | string[]>; other_answers?: Record<string, string> }) =>
+      f<any>(`/battlemaps/${id}/draft`, { method: 'PUT', body: JSON.stringify(data) }),
+    submitSection: (id: string, sectionKey: string, data: { answers: Record<string, string | string[]>; other_answers?: Record<string, string> }) =>
+      f<any>(`/battlemaps/${id}/sections/${sectionKey}/submit`, { method: 'POST', body: JSON.stringify(data) }),
+  },
 };

@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { useT } from '@/lib/i18n';
 import { LangToggle } from './_components/lang-toggle';
 import { UserMenu } from './_components/user-menu';
+import { PhaseNav } from './_components/phase-nav';
 import { AuthForm } from './_components/auth-form';
 import { CompanyForm } from './_components/company-form';
 import { Questionnaire } from './_components/questionnaire';
@@ -80,13 +81,12 @@ export default function DiagnosticPage() {
     setStep('questionnaire');
   };
 
-  const stepLabels: { key: Step; zh: string; en: string }[] = [
-    { key: 'auth', zh: '登录', en: 'Auth' },
-    { key: 'company', zh: '企业信息', en: 'Company' },
-    { key: 'questionnaire', zh: '问卷诊断', en: 'Questionnaire' },
-    { key: 'results', zh: '诊断结果', en: 'Results' },
-  ];
-  const stepIdx = stepLabels.findIndex((s) => s.key === step);
+  // Battle map unlocks once the Phase 1 diagnostic has produced scores.
+  const battlemapUnlocked = !!(
+    resultData?.module_scores &&
+    Object.keys(resultData.module_scores).some((k) => k !== '_meta')
+  );
+  const loggedIn = step !== 'auth' && step !== 'loading';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -94,24 +94,12 @@ export default function DiagnosticPage() {
       <header className="bg-white border-b">
         <div className="mx-auto max-w-4xl flex items-center justify-between px-4 py-3">
           <span className="text-lg font-bold text-emerald-600">IIFLE</span>
-          <div className="hidden sm:flex items-center gap-1">
-            {stepLabels.map((s, i) => (
-              <div key={s.key} className="flex items-center">
-                <div className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  i === stepIdx ? 'bg-emerald-500 text-white'
-                    : i < stepIdx ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-gray-100 text-gray-400'
-                }`}>
-                  <span>{i + 1}</span>
-                  <span>{t(s.zh, s.en)}</span>
-                </div>
-                {i < stepLabels.length - 1 && (
-                  <div className={`mx-1 h-px w-4 ${i < stepIdx ? 'bg-emerald-400' : 'bg-gray-200'}`} />
-                )}
-              </div>
-            ))}
-          </div>
-          {step !== 'auth' && step !== 'loading' ? (
+          {loggedIn && (
+            <div className="hidden sm:block">
+              <PhaseNav active="diagnostic" battlemapUnlocked={battlemapUnlocked} />
+            </div>
+          )}
+          {loggedIn ? (
             <UserMenu
               companyName={resultData?.company_name}
               diagnosticId={diagnosticId}
@@ -121,6 +109,12 @@ export default function DiagnosticPage() {
             <LangToggle />
           )}
         </div>
+        {/* Mobile: phase nav wraps below on small screens */}
+        {loggedIn && (
+          <div className="sm:hidden mx-auto max-w-4xl px-4 pb-3">
+            <PhaseNav active="diagnostic" battlemapUnlocked={battlemapUnlocked} />
+          </div>
+        )}
       </header>
 
       {/* Content */}

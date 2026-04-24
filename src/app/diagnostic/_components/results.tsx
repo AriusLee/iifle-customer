@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -148,6 +149,38 @@ export function Results({ diagnosticId, data, onRestart }: Props) {
           <p className="text-xs text-gray-500 mb-1">
             {t('我们的顾问团队将根据您的诊断结果，为您生成一份详细的独角兽成长报告，包含定制化的行动建议。', 'Our advisory team will generate a detailed Unicorn Growth Report with customized action recommendations based on your results.')}
           </p>
+        </CardContent>
+      </Card>
+
+      {/* Battle map CTA — only shown once Phase 1 is complete */}
+      <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50/60 to-white">
+        <CardContent className="pt-5 pb-4">
+          <div className="flex items-start gap-3">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-white shrink-0">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold mb-1">
+                {t('继续生成战略作战图', 'Continue to the Strategic Battle Map')}
+              </p>
+              <p className="text-xs text-gray-600 mb-3 leading-relaxed">
+                {t(
+                  'Phase 1 告诉你"你在哪里"。战略作战图进一步告诉你下一阶段怎么打、用什么顺序打、90 天开始做什么——AI 会从复制扩张、融资准备、资本化推进三类作战图中为你匹配最合适的一份。',
+                  'Phase 1 shows where you are. The battle map tells you how to level up — AI picks one of three versions (Replication, Financing, Capitalization) based on your answers and scores.',
+                )}
+              </p>
+              <Link
+                href="/battlemap"
+                className="cursor-pointer inline-flex items-center gap-1 rounded-lg bg-emerald-500 text-white text-sm font-semibold px-5 py-2 hover:bg-emerald-600"
+              >
+                {t('开启作战图', 'Open battle map')}
+                <span>→</span>
+              </Link>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
