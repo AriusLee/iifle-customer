@@ -21,8 +21,8 @@ export default function HomePage() {
 
   const features = [
     {
-      title_zh: '35 题 · 15 分钟',
-      title_en: '35 questions · 15 min',
+      title_zh: '45 题 · 18 分钟',
+      title_en: '45 questions · 18 min',
       desc_zh: '结构化问卷覆盖六大企业维度，填完即得评分',
       desc_en: 'Structured questionnaire across six enterprise dimensions',
     },

@@ -227,6 +227,18 @@ export function Questionnaire({ diagnosticId, onComplete }: Props) {
                 const val = answers[q.id] || (q.type === 'multi' ? [] : '');
                 return (
                   <div key={q.id}>
+                    {q.groupHeader && (
+                      <div className={`${qi > 0 ? 'mt-2 pt-5 border-t border-slate-200' : ''} mb-4`}>
+                        <h3 className="text-sm font-bold text-[var(--gold-dark)] mb-1 tracking-wide">
+                          {t(q.groupHeader.zh, q.groupHeader.en)}
+                        </h3>
+                        {(q.groupHeader.desc_zh || q.groupHeader.desc_en) && (
+                          <p className="text-[11px] leading-relaxed text-slate-500">
+                            {t(q.groupHeader.desc_zh ?? '', q.groupHeader.desc_en ?? q.groupHeader.desc_zh ?? '')}
+                          </p>
+                        )}
+                      </div>
+                    )}
                     <p className="text-sm font-semibold mb-1.5 text-slate-900 leading-relaxed">
                       <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white">
                         {qi + 1}
