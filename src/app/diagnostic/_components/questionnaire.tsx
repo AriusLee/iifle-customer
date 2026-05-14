@@ -190,7 +190,10 @@ export function Questionnaire({ diagnosticId, onComplete }: Props) {
       {/* Listing requirements panel — appears once Section F is submitted */}
       {isSectionDone && sectionKey === 'f' && (
         <div className="mt-4">
-          <ListingRequirements enterpriseStage={diag?.enterprise_stage} />
+          <ListingRequirements
+            enterpriseStage={diag?.enterprise_stage}
+            q33Answer={typeof answers.Q33 === 'string' ? answers.Q33 : undefined}
+          />
         </div>
       )}
 

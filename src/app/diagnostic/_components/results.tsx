@@ -214,7 +214,7 @@ export function Results({ diagnosticId, data, onRestart }: Props) {
       )}
 
       {/* ── Listing requirements reference ── */}
-      <ListingRequirements enterpriseStage={stage} />
+      <ListingRequirements enterpriseStage={stage} q33Answer={data?.answers?.Q33 as string | undefined} />
 
       {/* ── Battle map CTA ── */}
       <div className="relative rounded-2xl border border-[var(--gold)]/25 bg-gradient-to-br from-[var(--gold-soft)]/50 via-white to-white p-6 overflow-hidden shadow-[var(--shadow-soft)]">

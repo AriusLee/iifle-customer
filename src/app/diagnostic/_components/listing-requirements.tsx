@@ -3,20 +3,29 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useT } from '@/lib/i18n';
-import { pickTiersForStage, type ListingTier } from '@/lib/listing-requirements';
+import {
+  pickHighlightFromQ33,
+  pickTiersForStage,
+  type Jurisdiction,
+  type ListingTier,
+} from '@/lib/listing-requirements';
 
 interface Props {
   enterpriseStage: string | null | undefined;
+  /** Optional founder Q33 answer — drives which column gets the ⭐ highlight. */
+  q33Answer?: string | null;
 }
 
 /**
- * Side-by-side reference panel showing Bursa Malaysia (SC) and US SEC
- * listing requirements for the tier most appropriate to the company's
- * detected enterprise stage. Reference info only — no pass/fail badges.
+ * Side-by-side reference panel showing Bursa Malaysia (SC), HKEX (SFC), and
+ * NASDAQ (SEC) listing requirements for the tier most appropriate to the
+ * company's detected enterprise stage. When the founder picks a specific
+ * IPO market in Q33, that column is highlighted with a ⭐ + gold ring.
  */
-export function ListingRequirements({ enterpriseStage }: Props) {
+export function ListingRequirements({ enterpriseStage, q33Answer }: Props) {
   const { t } = useT();
-  const pair = pickTiersForStage(enterpriseStage);
+  const tiers = pickTiersForStage(enterpriseStage);
+  const highlight = pickHighlightFromQ33(q33Answer);
 
   return (
     <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50/40 to-white overflow-hidden">
@@ -30,18 +39,28 @@ export function ListingRequirements({ enterpriseStage }: Props) {
           </div>
           <div className="flex-1">
             <p className="text-sm font-semibold text-gray-800">
-              {t('上市要求对比 — 马来西亚 SC 与 美国 SEC', 'Listing Requirements — Bursa SC vs US SEC')}
+              {t('上市要求对比 — 马来西亚 · 香港 · 美国', 'Listing Requirements — MY · HK · US')}
             </p>
             <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
-              {t(pair.rationale_zh, pair.rationale_en)}
+              {t(tiers.rationale_zh, tiers.rationale_en)}
             </p>
+            {highlight && (
+              <p className="text-[11px] text-amber-700 font-medium mt-1.5 leading-relaxed">
+                ⭐{' '}
+                {t(
+                  '已根据您选择的目标市场（Q33）高亮对应列。',
+                  "Highlighting your preferred listing market from Q33."
+                )}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Two-column comparison */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <TierColumn tier={pair.my} t={t} accent="emerald" />
-          <TierColumn tier={pair.us} t={t} accent="blue" />
+        {/* Three-column comparison */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <TierColumn tier={tiers.my} t={t} accent="emerald" highlighted={highlight === 'MY'} />
+          <TierColumn tier={tiers.hk} t={t} accent="rose" highlighted={highlight === 'HK'} />
+          <TierColumn tier={tiers.us} t={t} accent="blue" highlighted={highlight === 'US'} />
         </div>
 
         {/* Disclaimer */}
@@ -58,27 +77,37 @@ export function ListingRequirements({ enterpriseStage }: Props) {
 
 /* ── Single jurisdiction column ───────────────────────────────────────── */
 
+const FLAG: Record<Jurisdiction, string> = { MY: '🇲🇾', HK: '🇭🇰', US: '🇺🇸' };
+
 function TierColumn({
   tier,
   t,
   accent,
+  highlighted,
 }: {
   tier: ListingTier;
   t: (zh: string, en: string) => string;
-  accent: 'emerald' | 'blue';
+  accent: 'emerald' | 'rose' | 'blue';
+  highlighted: boolean;
 }) {
   const badgeColor =
     accent === 'emerald'
       ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-      : 'bg-blue-100 text-blue-700 border-blue-200';
-  const flag = tier.jurisdiction === 'MY' ? '🇲🇾' : '🇺🇸';
+      : accent === 'rose'
+        ? 'bg-rose-100 text-rose-700 border-rose-200'
+        : 'bg-blue-100 text-blue-700 border-blue-200';
+
+  const containerClass = highlighted
+    ? 'rounded-xl border-2 border-amber-400 bg-gradient-to-br from-amber-50/70 to-white p-3.5 ring-2 ring-amber-200 shadow-sm'
+    : 'rounded-xl border bg-white p-3.5';
 
   return (
-    <div className="rounded-xl border bg-white p-3.5">
+    <div className={containerClass}>
       {/* Tier header */}
       <div className="mb-3">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-base">{flag}</span>
+          {highlighted && <span className="text-sm" aria-label="preferred market">⭐</span>}
+          <span className="text-base">{FLAG[tier.jurisdiction]}</span>
           <Badge className={`${badgeColor} text-[10px] font-bold border px-2 py-0.5`}>
             {tier.regulator}
           </Badge>
